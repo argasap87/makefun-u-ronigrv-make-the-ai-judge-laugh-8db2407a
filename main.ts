@@ -41,6 +41,30 @@ for (const ch of LINE) {
   }
 }
 
+// Reviser (second session): reject leading/trailing whitespace and
+// Unicode space separators (U+00A0, U+1680, U+2000-U+200A, U+202F,
+// U+205F, U+3000). The loop above only catches control/format chars, so
+// a no-break space or stray edge space would otherwise slip into
+// entry.txt and fail a strict trim/single-line check by the judge.
+if (LINE !== LINE.trim()) {
+  console.error("entry fails the gate: leading or trailing whitespace");
+  process.exit(1);
+}
+for (const ch of LINE) {
+  const code = ch.codePointAt(0)!;
+  const isUnicodeSpace =
+    code === 0x00a0 ||
+    code === 0x1680 ||
+    (code >= 0x2000 && code <= 0x200a) ||
+    code === 0x202f ||
+    code === 0x205f ||
+    code === 0x3000;
+  if (isUnicodeSpace) {
+    console.error("entry fails the gate: invisible Unicode space character");
+    process.exit(1);
+  }
+}
+
 // One sentence only: a second sentence would split the joke in two.
 const sentences = LINE.split(/(?<=[.!?])\s+/).filter(Boolean);
 if (sentences.length !== 1) {
